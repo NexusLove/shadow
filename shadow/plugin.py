@@ -16,6 +16,7 @@ from enum import IntEnum
 
 _RE_INFERED_EVENT_NAME = re.compile(r"on_([A-Za-z_]+)")
 _RE_INFERED_SUB = re.compile(r"(_|^)([A-Za-z])")
+_RE_CAMEL_CASE = re.compile(r'([a-z])?([A-Z])')
 
 __all__ = ("Plugin", "PluginFlag", "PluginListnerType")
 
@@ -122,6 +123,14 @@ class Plugin:
         return f'<shadow.Plugin: name={self.__class__.__name__!r} flags=<{flags}>>'
 
     # Internals
+
+    @staticmethod
+    def __name_from_plugin_flag(flag: PluginFlag) -> str:
+        def to_snake_case(match: re.Match) -> str:
+            left, right = match[1], match[2]
+            return f'{left}_{right}'
+
+        return _RE_CAMEL_CASE.sub(to_snake_case, flag.name)
 
     @staticmethod
     def __plugin_flag_from_name(name: str) -> PluginFlag:
