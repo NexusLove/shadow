@@ -118,7 +118,8 @@ class Plugin:
         self.client = client
 
     def __repr__(self) -> str:
-        return f'<shadow.Plugin: name={self.__class__.__name__!r}>'
+        flags = ', '.join(f'{flag.name.lower()}=True' for flag in self.__flags)
+        return f'<shadow.Plugin: name={self.__class__.__name__!r} flags=<{flags}>>'
 
     # Internals
 
