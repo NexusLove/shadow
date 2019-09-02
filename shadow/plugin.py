@@ -39,7 +39,7 @@ class PluginListnerType(IntEnum):
     ShardReady = 4
     Resumed = 5
     Error = 6
-    SocketRawRecieve = 7
+    SocketRawReceive = 7
     SocketRawSend = 8
     Typing = 9
     Message = 10
