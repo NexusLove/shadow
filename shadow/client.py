@@ -17,6 +17,7 @@ class Client(discord.Client):
     """A modified discord Client tailored for the applications usage."""
 
     __plugins: Set[Plugin] = set()
+    log = logger = LOGGER
 
     async def _plugin_dispatch_reactor(
         self,
