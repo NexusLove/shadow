@@ -25,6 +25,11 @@ def main(token: str, use: Iterable[str], discard: Iterable[str]):
     for plugin in plugins:
         client.load_plugin_module(f'shadow.ext.{plugin}')
 
+    if client.plugins:
+        client.log.info(
+            'Loaded %d plugins: %s', len(client.plugins), repr(client.plugins)
+        )
+
     client.run(token, bot=False)
 
 

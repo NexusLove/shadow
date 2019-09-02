@@ -56,7 +56,7 @@ class Client(discord.Client):
                 and issubclass(value, Plugin)
                 and Plugin.check_flag(value, PluginFlag.Exposed)
             ):
-                LOGGER.info('Attempting to load exposed plugin: %s', value)
+                self.logger.info('Attempting to load exposed plugin: %s', value)
                 self.load_plugin(value)
 
     def unload_plugin_module(self, name: str) -> int:
