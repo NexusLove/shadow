@@ -174,6 +174,8 @@ class Plugin:
                 if enabled:
                     klass._Plugin__flags.add(getattr(PluginFlag, flag.title()))
 
+            return klass
+
         return decorator
 
     # Plugin method decorators
