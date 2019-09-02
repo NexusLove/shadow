@@ -126,7 +126,7 @@ class Plugin:
     @staticmethod
     def __name_from_plugin_flag(flag: PluginFlag) -> str:
         def to_snake_case(match: re.Match) -> str:
-            left, right = match[1], match[2]
+            left, right = match.groups()
             return f'{left}_{right}'
 
         return _RE_CAMEL_CASE.sub(to_snake_case, flag.name)
