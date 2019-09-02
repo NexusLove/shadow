@@ -25,7 +25,6 @@ class PluginFlag(IntEnum):
     """An enum of feature flags for a plugin."""
 
     Exposed = 0
-    Reloadable = 1
 
 
 class PluginListnerType(IntEnum):
@@ -180,15 +179,47 @@ class Plugin:
         def decorator(klass):
             assert isinstance(klass, type) and issubclass(klass, Plugin)
 
-            for flag, enabled in flags.items():
+            plugin_unload_handler = next(
+                (
+                    value
+                    for _, value in inspect.getmembers(klass)
+                    if hasattr(value, '_Plugin__unload_handler')
+                ),
+                None,
+            )
+
+            if plugin_unload_handler is not None:
+                setattr(klass, '__Plugin_unload__', plugin_unload_handler)
+
+            for name, enabled in flags.items():
                 if enabled:
-                    klass._Plugin__flags.add(getattr(PluginFlag, flag.title()))
+                    flag = getattr(PluginFlag, name.title())
+                    klass._Plugin__flags.add(flag)
 
             return klass
 
         return decorator
 
     # Plugin method decorators
+
+    @staticmethod
+    def unload_handler(method: Callable[..., Any]) -> Callable[..., Any]:
+        """A method decorator that marks the plugins unload callback.
+
+        >>> # Example usage
+        >>> @Plugin.with_flags(reloadable=True)
+        ... class Foo(Plugin):
+        ...     @Plugin.unload_handler
+        ...     def __unload(self):
+        ...         print(f'Unloading {self!r}')
+
+        Parameters
+        ----------
+        method : Callable[:class:`...`, Any]
+            The method to mark.
+        """
+        setattr(method, '_Plugin__unload_handler', None)
+        return method
 
     @staticmethod
     def event_listener(
