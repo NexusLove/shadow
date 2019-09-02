@@ -19,55 +19,13 @@ class Client(discord.Client):
     __plugins: Set[Plugin] = set()
     log = logger = LOGGER
 
-    async def _plugin_dispatch_reactor(
-        self,
-        event: str,
-        args: List[Any],
-        kwargs: Dict[Any, Any],
-        tasks: List[asyncio.Task],
-    ) -> None:
-        """React and dispatch exceptions from plugin dispatch tasks.
-
-        Parameters
-        ----------
-        event : :class:`str`
-            The event being dispatched.
-        args : List[Any]
-            Dispatch handler args.
-        kwargs : Dict[Any, Any]
-            Dispatch handler kwargs.
-        tasks : List[:class:`asyncio.Task`]
-            The active tasks to observe and react to.
-        """
-        bucket = tasks
-
-        while bucket:
-            await asyncio.sleep(0.1)
-            bucket = []
-
-            for task in tasks:
-                done = err = task.done() and task.exception()
-
-                if not isinstance(err, Exception) and not done:
-                    bucket.append(task)
-                    continue
-
-                LOGGER.error('Dispatch task=%s with reason %s', repr(task), repr(err))
-
-                self._direct_dispatch('dispatch_error', err, event, args, kwargs)
-
-            tasks = bucket
-
-    _direct_dispatch = discord.Client.dispatch
+    schedule_event = discord.Client._schedule_event
 
     def dispatch(self, event, *args, **kwargs):
-        tasks: List[asyncio.Task] = [
-            list(plugin.dispatch(event, *args, **kwargs)) for plugin in self.__plugins
-        ]
-
-        self.loop.create_task(self._plugin_dispatch_reactor(event, args, kwargs, tasks))
-
         super().dispatch(event, *args, **kwargs)
+
+        for plugin in self.plugins:
+            plugin.dispatch(event, *args, **kwargs)
 
     def load_plugin_module(self, name: str) -> None:
         """Loads a plugin module.

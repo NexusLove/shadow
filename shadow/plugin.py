@@ -358,7 +358,7 @@ class Plugin:
 
     # Generic
 
-    def dispatch(self, event, *args, **kwargs) -> Tuple[asyncio.Task]:
+    def dispatch(self, event, *args, **kwargs):
         r"""Dispatch an event to the plugins event handlers.
 
         Parameters
@@ -375,19 +375,18 @@ class Plugin:
             return match.group(2).upper()
 
         plugin_listner_name = _RE_INFERED_SUB.sub(infered_substitution_callback, event)
-        plugin_listner_type = getattr(PluginListnerType, plugin_listner_name)
 
-        def and_find_specific(handler: Callable[..., Any]) -> bool:
-            return getattr(handler, '_Plugin__event_listener') == plugin_listner_type
+        try:
+            plugin_listner_type = getattr(PluginListnerType, plugin_listner_name)
+        except AttributeError:
+            return
 
         handlers = (
             value
-            for _, value in (getattr(self, name) for name in dir(self))
-            if inspect.ismethod(value) and hasattr(value, '_Plugin__event_listener')
+            for value in (getattr(self, name) for name in dir(self))
+            if inspect.ismethod(value)
+            and (getattr(value, '_Plugin__event_listener', None) == plugin_listner_type)
         )
 
-        return (
-            self.client.loop.create_task(handler(*args, **kwargs))
-            for handler in filter(and_find_specific, handlers)
-            if getattr(handler, '_Plugin__event_listener') == plugin_listner_type
-        )
+        for handler in handlers:
+            self.client.schedule_event(handler, f'on_{event}', *args, **kwargs)
