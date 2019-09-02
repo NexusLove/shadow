@@ -16,6 +16,10 @@ LOGGER = get_colored_logger(__name__)
 class Client(discord.Client):
     """A modified discord Client tailored for the applications usage."""
 
+    @property
+    def plugins(self):
+        return self.__plugins
+
     __plugins: Set[Plugin] = set()
     log = logger = LOGGER
 
