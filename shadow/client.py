@@ -87,3 +87,13 @@ class Client(discord.Client):
             The plugin to load.
         """
         self.__plugins[klass] = klass(self)
+
+    def unload_plugin(self, plugin: Plugin) -> None:
+        """Unload a plugin instance.
+
+        Parameters
+        ----------
+        plugin : :class:`Plugin`
+            The plugin instance to unload.
+        """
+        self.__plugins.pop(type(plugin))
