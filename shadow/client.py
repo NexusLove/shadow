@@ -3,7 +3,8 @@ import asyncio
 import sys
 import importlib
 import inspect
-from typing import Set, Dict, List, Any
+from typing import Set, Dict, List, Any, Type, Union
+from types import MappingProxyType
 
 import discord
 
@@ -18,9 +19,11 @@ class Client(discord.Client):
 
     @property
     def plugins(self):
-        return self.__plugins
+        """Mapping[Type[:class:`Plugin'], :class:'Plugin']: A read-only mapping of plugin class to plugin instance."""
+        return MappingProxyType(self.__plugins)
 
-    __plugins: Set[Plugin] = set()
+    __plugins: Dict[Type[Plugin], Plugin] = {}
+
     log = logger = LOGGER
 
     schedule_event = discord.Client._schedule_event
@@ -28,7 +31,7 @@ class Client(discord.Client):
     def dispatch(self, event, *args, **kwargs):
         super().dispatch(event, *args, **kwargs)
 
-        for plugin in self.plugins:
+        for plugin in self.plugins.values():
             plugin.dispatch(event, *args, **kwargs)
 
     def load_plugin_module(self, name: str) -> None:
@@ -83,4 +86,4 @@ class Client(discord.Client):
         klass : :class:`Plugin`
             The plugin to load.
         """
-        self.__plugins.add(klass(self))
+        self.__plugins[klass] = klass(self)
