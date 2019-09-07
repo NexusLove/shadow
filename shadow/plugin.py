@@ -298,7 +298,7 @@ class Plugin:
         def decorator(method: Callable[..., Any]) -> Callable[..., Any]:
             assert event is not None
 
-            listener_type_name = _RE_INFERED_SUB(infered_substitution_callback, event)
+            listener_type_name = _RE_INFERED_SUB.sub(infered_substitution_callback, event)
             listener_type = getattr(PluginListnerType, listener_type_name)
 
             setattr(method, '_Plugin__event_listener', listener_type)
