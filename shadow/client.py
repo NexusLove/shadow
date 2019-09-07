@@ -78,8 +78,8 @@ class Client(discord.Client):
             be zero if all refrences to the module have been dropped.
         """
 
-    def load_plugin(self, klass: Plugin) -> None:
-        """Load an individual plugin.
+    def load_plugin(self, klass: Type[Plugin]) -> None:
+        """Load an individual plugin type.
 
         Parameters
         ----------
