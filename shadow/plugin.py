@@ -13,6 +13,8 @@ import re
 from typing import Set, List, Callable, Any, Iterable, Union, Iterator, Optional, Tuple
 from enum import IntEnum
 
+from .utils import get_colored_logger
+
 
 _RE_INFERED_EVENT_NAME = re.compile(r"on_([A-Za-z_]+)")
 _RE_INFERED_SUB = re.compile(r"(_|^)([A-Za-z])")
@@ -116,6 +118,7 @@ class Plugin:
 
     def __init__(self, client):
         self.client = client
+        self.logger = get_colored_logger(type(self).__name__)
 
     def __repr__(self) -> str:
         flags = ', '.join(f'{flag.name.lower()}=True' for flag in self.__flags)
