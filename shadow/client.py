@@ -97,3 +97,9 @@ class Client(discord.Client):
             The plugin instance to unload.
         """
         self.__plugins.pop(type(plugin))
+
+    async def on_connect(self) -> None:
+        self.log.info('Client has connected...')
+
+    async def on_ready(self) -> None:
+        self.log.info('Client is ready!')
