@@ -67,7 +67,7 @@ class ReThread(threading.Thread):
     @property
     def complete(self) -> bool:
         """:class:`bool` - True if parsing completed."""
-        with thread.lock:
+        with self.lock:
             return self.__complete
 
     def result(self) -> Tuple[str, int]:
