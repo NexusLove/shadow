@@ -30,7 +30,7 @@ class PluginFlag(IntEnum):
 
 
 class PluginListnerType(IntEnum):
-    """An enum of all discord.py supported events.
+    """An enum of all supported discord.py events.
 
     refrence: https://discordpy.readthedocs.io/en/latest/api.html#event-reference
     """
@@ -94,7 +94,7 @@ class Plugin:
 
     Plugins are classes which inherit from this base class.
 
-    >>> @Plugin.exposed  # Allow our client to automatically load the plugin.
+    >>> @Plugin.with_flags(exposed=True)  # Allow our client to automatically load the plugin.
     ... class Cool(Plugin):
     ...     \"\"\"A cool plugin.\"\"\"
     ...
@@ -158,7 +158,17 @@ class Plugin:
 
     @staticmethod
     def with_flags(**flags):
-        r"""Configure the plugins default flags.
+        r"""Decorate a Plugin class with default flags.
+
+        This class decorator is intended to be applied
+        to Plugin class instances directly.
+
+        It is used to set and clear the default flags
+        for the plugin.
+
+        >>> @Plugin.with_flags(exposed=True)  # Marks this class with the `exposed` flag set
+        ... clas Foo(Plugin):
+        ...     pass
 
         Parameters
         ----------
@@ -207,10 +217,13 @@ class Plugin:
 
     @staticmethod
     def unload_handler(method: Callable[..., Any]) -> Callable[..., Any]:
-        """A method decorator that marks the plugins unload callback.
+        """A method decorator that marks an unload callback.
+
+        When a Plugin instance, class or module is reloaded
+        appropriate instance, class and module level destructors are called.
 
         >>> # Example usage
-        >>> @Plugin.with_flags(reloadable=True)
+        >>> @Plugin.with_flags(exposed=True)
         ... class Foo(Plugin):
         ...     @Plugin.unload_handler
         ...     def __unload(self):
@@ -315,7 +328,12 @@ class Plugin:
     def set_flags(self, *flags: List[Union[PluginFlag, str]]) -> None:
         r"""Enable the specified flags.
 
-        It is a no-op if you set an already enabled flag.
+        Enable a flag for the current plugin instance.
+
+        >>> plugin = next(iter(client.plugins.values()))
+        >>> plugin.set_flags('exposed')
+
+        If you enable an already set flag it is a no-op.
 
         Parameters
         ----------
@@ -337,7 +355,12 @@ class Plugin:
     def clear_flags(self, *flags: List[Union[PluginFlag, str]]) -> None:
         r"""Clear the specified flags.
 
-        it is a no-op if you clear an already cleared flag.
+        Disable a flag for the current plugin instance.
+
+        >>> plugin = next(iter(client.plugins.values()))
+        >>> plugin.clear_flags('exposed')
+
+        If you disable an already cleared flag it is a no-op.
 
         Parameters
         ----------
@@ -361,6 +384,11 @@ class Plugin:
         self, flag: Union[PluginFlag, str], present: Optional[bool] = True
     ) -> bool:
         """Check if a specified flag is enabled or disabled.
+
+        >>> if plugin.check_flag('exposed', present=True):
+        ...     print(f'Exposed plugin: {plugin!r}')
+        ... else:
+        ...     print(f'Hidden plugin: {plugin!r}')
 
         Parameters
         ----------
@@ -404,6 +432,14 @@ class Plugin:
 
     def dispatch(self, event, *args, **kwargs):
         r"""Dispatch an event to the plugins event handlers.
+
+        The event argument must be a snake_case formatted
+        name of the event to dispatch. such as: "message",
+        "reaction_add".
+
+        The *args and **kwargs are passed onto the event
+        handler callback.
+
 
         Parameters
         ----------
