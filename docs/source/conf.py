@@ -47,10 +47,12 @@ templates_path = ['_templates']
 extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
 ]
 
 autodoc_member_order = 'bysource'
 
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
 
 # -- Options for HTML output -------------------------------------------------
 
