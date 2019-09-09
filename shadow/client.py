@@ -29,7 +29,7 @@ class Client(discord.Client):
 
     @property
     def plugins(self):
-        """Mapping[Type[:class:`Plugin'], :class:'Plugin']: A read-only mapping of plugin class to plugin instance."""
+        """Mapping[Type[:class:`Plugin`], :class:`Plugin`]: A read-only mapping of plugin class to plugin instance."""
         return MappingProxyType(self.__plugins)
 
     __plugins: Dict[Type[Plugin], Plugin] = {}
