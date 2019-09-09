@@ -10,6 +10,7 @@ the shadow client places on extensions.
 import asyncio
 import inspect
 import re
+import functools
 from typing import Set, List, Callable, Any, Iterable, Union, Iterator, Optional, Tuple
 from enum import IntEnum
 
@@ -87,6 +88,19 @@ class PluginListnerType(IntEnum):
     RelationshipAdd = 50
     RelationshipRemove = 51
     RelationshipUpdate = 52
+
+    @staticmethod
+    @funcools.lru_cache()
+    def from_event_name(event: str) -> 'PluginFlag':
+        def infered_substitution_callback(match: re.Match) -> str:
+            return match.group(2).upper()
+
+        plugin_listner_name = _RE_INFERED_SUB.sub(infered_substitution_callback, event)
+
+        try:
+            return getattr(PluginFlag, plugin_listner_name)
+        except AttributeError as err:
+            raise KeyError(f'No listener type found {event!r}') from err
 
 
 class Plugin:
@@ -299,10 +313,7 @@ class Plugin:
 
             method_name = match.group(1)
 
-            listener_type_name = _RE_INFERED_SUB.sub(
-                infered_substitution_callback, method_name
-            )
-            listener_type = getattr(PluginListnerType, listener_type_name)
+            listener_type = PluginListnerType.from_event_name(method_name)
 
             setattr(_method, '_Plugin__event_listener', listener_type)
 
@@ -450,22 +461,15 @@ class Plugin:
         \*\*kwargs : Dict[Any, Any]
             The kwargs to pass to the event handler.
         """
-
-        def infered_substitution_callback(match: re.Match) -> str:
-            return match.group(2).upper()
-
-        plugin_listner_name = _RE_INFERED_SUB.sub(infered_substitution_callback, event)
-
-        try:
-            plugin_listner_type = getattr(PluginListnerType, plugin_listner_name)
-        except AttributeError:
-            return
+        plugin_listner_type = PluginFlag.from_event_name(event)
 
         handlers = (
             value
             for value in (getattr(self, name) for name in dir(self))
-            if inspect.ismethod(value)
-            and (getattr(value, '_Plugin__event_listener', None) == plugin_listner_type)
+            if (
+                inspect.ismethod(value)
+                and (getattr(value, '_Plugin__event_listener', None) == plugin_listner_type)
+            )
         )
 
         for handler in handlers:
