@@ -91,16 +91,16 @@ class PluginListnerType(IntEnum):
 
     @staticmethod
     @functools.lru_cache()
-    def from_event_name(event: str) -> 'PluginFlag':
+    def from_event_name(event: str) -> 'PluginListnerType':
         def infered_substitution_callback(match: re.Match) -> str:
             return match.group(2).upper()
 
         plugin_listner_name = _RE_INFERED_SUB.sub(infered_substitution_callback, event)
 
         try:
-            return getattr(PluginFlag, plugin_listner_name)
+            return getattr(PluginListnerType, plugin_listner_name)
         except AttributeError as err:
-            raise KeyError(f'No listener type found {event!r}') from err
+            raise KeyError(f'No listener type found {event!r} ({plugin_listner_name!r}') from err
 
 
 class Plugin:
@@ -461,7 +461,10 @@ class Plugin:
         \*\*kwargs : Dict[Any, Any]
             The kwargs to pass to the event handler.
         """
-        plugin_listner_type = PluginFlag.from_event_name(event)
+        try:
+            plugin_listner_type = PluginListnerType.from_event_name(event)
+        except KeyError:
+            return
 
         handlers = (
             value
