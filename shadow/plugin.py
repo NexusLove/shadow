@@ -90,7 +90,7 @@ class PluginListnerType(IntEnum):
     RelationshipUpdate = 52
 
     @staticmethod
-    @funcools.lru_cache()
+    @functools.lru_cache()
     def from_event_name(event: str) -> 'PluginFlag':
         def infered_substitution_callback(match: re.Match) -> str:
             return match.group(2).upper()
