@@ -25,7 +25,15 @@ def _exposed(pair: Tuple[str, Any]) -> bool:
 
 
 class Client(discord.Client):
-    """A modified discord Client tailored for the applications usage."""
+    """An augmented :class:`discord.Client` subclass.
+
+    Attributes
+    ----------
+    log : :class:`logging.Logger`
+        The logger instance attached to the client.
+    logger : :class:`logging.Logger`
+        Same as :attr:`log`
+    """
 
     @property
     def plugins(self):
