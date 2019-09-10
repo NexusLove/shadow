@@ -39,10 +39,10 @@ class Client(discord.Client):
     schedule_event = discord.Client._schedule_event
 
     def dispatch(self, event, *args, **kwargs):
-        super().dispatch(event, *args, **kwargs)
-
         for plugin in self.plugins.values():
             plugin.dispatch(event, *args, **kwargs)
+
+        super().dispatch(event, *args, **kwargs)
 
     def load_plugin_module(
         self,
